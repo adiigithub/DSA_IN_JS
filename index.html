@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Efficient Queue Visualization</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+    .queue { display: flex; justify-content: center; gap: 10px; margin: 20px 0; }
+    .box {
+      width: 60px;
+      height: 60px;
+      background-color: #4CAF50;
+      color: white;
+      font-weight: bold;
+      line-height: 60px;
+      border-radius: 8px;
+      position: relative;
+    }
+    .box::before {
+      content: attr(data-index);
+      position: absolute;
+      top: -20px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 12px;
+      color: black;
+    }
+    .label { font-size: 18px; margin-top: 10px; }
+    button { margin: 5px; padding: 10px 20px; }
+    input { padding: 8px; width: 150px; }
+  </style>
+</head>
+<body>
+  <h1>Efficient Queue Visualization</h1>
+  <input id="valueInput" placeholder="Enter value" />
+  <button onclick="enqueue()">Enqueue</button>
+  <button onclick="dequeue()">Dequeue</button>
+  <div class="queue" id="queueContainer"></div>
+  <div class="label" id="status"></div>
+
+  <script>
+    class EfficientQueue {
+      constructor() {
+        this.storage = {};
+        this.front = 0;
+        this.rear = 0;
+      }
+
+      enqueue(item) {
+        this.storage[this.rear] = item;
+        this.rear++;
+        this.render();
+      }
+
+      dequeue() {
+        if (this.isEmpty()) {
+          document.getElementById("status").innerText = "⚠️ Queue is empty!";
+          return;
+        }
+        delete this.storage[this.front];
+        this.front++;
+        this.render();
+      }
+
+      isEmpty() {
+        return this.front === this.rear;
+      }
+
+      render() {
+        const container = document.getElementById("queueContainer");
+        container.innerHTML = "";
+        for (let i = this.front; i < this.rear; i++) {
+          const box = document.createElement("div");
+          box.className = "box";
+          box.innerText = this.storage[i];
+          box.setAttribute("data-index", i);
+          container.appendChild(box);
+        }
+
+        document.getElementById("status").innerText =
+          `Front: ${this.front}, Rear: ${this.rear}, Size: ${this.rear - this.front}`;
+      }
+    }
+
+    const q = new EfficientQueue();
+
+    function enqueue() {
+      const input = document.getElementById("valueInput");
+      const value = input.value.trim();
+      if (value !== "") {
+        q.enqueue(value);
+        input.value = "";
+      }
+    }
+
+    function dequeue() {
+      q.dequeue();
+    }
+  </script>
+</body>
+</html>

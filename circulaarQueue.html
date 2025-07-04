@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Circular Queue Visualization</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    input {
+      padding: 8px;
+      width: 150px;
+      margin-bottom: 10px;
+    }
+    button {
+      margin: 5px;
+      padding: 10px 20px;
+    }
+    .queue {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .cell {
+      width: 70px;
+      height: 70px;
+      background: #4CAF50;
+      color: white;
+      font-weight: bold;
+      font-size: 18px;
+      border-radius: 10px;
+      line-height: 70px;
+      position: relative;
+    }
+    .cell[data-label]::after {
+      content: attr(data-label);
+      position: absolute;
+      bottom: -20px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 12px;
+      color: #333;
+      font-weight: normal;
+    }
+    .status {
+      margin-top: 15px;
+      font-weight: bold;
+      color: #d32f2f;
+    }
+  </style>
+</head>
+<body>
+  <h1>Circular Queue Visualization</h1>
+  <input id="valueInput" placeholder="Enter value" />
+  <br>
+  <button onclick="enqueue()">Enqueue</button>
+  <button onclick="dequeue()">Dequeue</button>
+  <button onclick="reset()">Reset</button>
+  <div class="queue" id="queueContainer"></div>
+  <div class="status" id="statusMessage"></div>
+
+  <script>
+    class CircularQueue {
+      constructor(capacity) {
+        this.items = new Array(capacity).fill(null);
+        this.capacity = capacity;
+        this.currentLength = 0;
+        this.front = -1;
+        this.rear = -1;
+      }
+
+      enqueue(element) {
+        if (this.currentLength === this.capacity) {
+          this.showStatus("⚠️ Queue is full");
+          return;
+        }
+        this.rear = (this.rear + 1) % this.capacity;
+        this.items[this.rear] = element;
+        this.currentLength++;
+        if (this.front === -1) {
+          this.front = this.rear;
+        }
+        this.showStatus("");
+        this.render();
+      }
+
+      dequeue() {
+        if (this.currentLength === 0) {
+          this.showStatus("⚠️ Queue is empty");
+          return;
+        }
+        this.items[this.front] = null;
+        this.front = (this.front + 1) % this.capacity;
+        this.currentLength--;
+        if (this.currentLength === 0) {
+          this.front = -1;
+          this.rear = -1;
+        }
+        this.showStatus("");
+        this.render();
+      }
+
+      render() {
+        const container = document.getElementById("queueContainer");
+        container.innerHTML = "";
+
+        for (let i = 0; i < this.capacity; i++) {
+          const div = document.createElement("div");
+          div.className = "cell";
+          div.innerText = this.items[i] !== null ? this.items[i] : "";
+          
+          if (i === this.front && i === this.rear && this.currentLength > 0) {
+            div.setAttribute("data-label", "Front/Rear");
+          } else if (i === this.front && this.currentLength > 0) {
+            div.setAttribute("data-label", "Front");
+          } else if (i === this.rear && this.currentLength > 0) {
+            div.setAttribute("data-label", "Rear");
+          }
+
+          container.appendChild(div);
+        }
+      }
+
+      showStatus(msg) {
+        document.getElementById("statusMessage").innerText = msg;
+      }
+
+      reset() {
+        this.items = new Array(this.capacity).fill(null);
+        this.front = -1;
+        this.rear = -1;
+        this.currentLength = 0;
+        this.render();
+        this.showStatus("Queue reset!");
+      }
+    }
+
+    const q = new CircularQueue(5);
+    q.render();
+
+    function enqueue() {
+      const input = document.getElementById("valueInput");
+      const val = input.value.trim();
+      if (val !== "") {
+        q.enqueue(val);
+        input.value = "";
+      }
+    }
+
+    function dequeue() {
+      q.dequeue();
+    }
+
+    function reset() {
+      q.reset();
+    }
+  </script>
+</body>
+</html>
